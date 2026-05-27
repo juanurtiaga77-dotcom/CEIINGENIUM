@@ -1,0 +1,14 @@
+import mysql.connector
+
+# Configuración única y centralizada
+DB_CONFIG = {
+    'host': '192.168.0.110',
+    'user': 'root',
+    'password': 'CEI_db_2026', 
+    'database': 'gestion_comision_INGENIUM',
+    'use_pure': True  
+}
+
+def obtener_conexion():
+    """Establece y devuelve una conexión limpia a MySQL."""
+    return mysql.connector.connect(**DB_CONFIG)

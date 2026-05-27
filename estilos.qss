@@ -1,0 +1,232 @@
+/* ========================================================================
+   ESTILOS GENERALES Y FUENTES
+   ======================================================================== */
+* {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: #03045e; /* Azul profundo predeterminado para todo el texto */
+}
+
+/* ========================================================================
+   1. ESTILOS PARA LA VENTANA DE INICIO DE SESIÓN (VentanaLogin)
+   ======================================================================== */
+QWidget#login_window {
+    background-color: #caf0f8; /* Celeste muy claro de fondo */
+}
+
+/* La "Carta" central flotante */
+QFrame#login_card {
+    background-color: white;
+    border-radius: 20px; /* Bordes muy redondeados */
+    padding: 40px;
+}
+
+QLabel#login_title {
+    color: #03045e;
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+QLabel#login_label {
+    color: #0077b6; /* Azul medio para las etiquetas de campo */
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* Campos de entrada de texto modernos */
+QLineEdit {
+    background-color: #f1faff; /* Un azul casi blanco muy suave */
+    color: #03045e;
+    border: 2px solid #e1f5fe;
+    border-radius: 10px;
+    padding: 12px 15px;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+QLineEdit:focus {
+    border: 2px solid #00b4d8; /* Borde cian brillante al hacer clic */
+    background-color: white;
+}
+
+/* Botones del Login */
+QPushButton {
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 12px 20px;
+}
+
+QPushButton#btn_ingresar {
+    background-color: #00b4d8; /* Cian brillante */
+    color: white;
+}
+
+QPushButton#btn_ingresar:hover {
+    background-color: #0077b6; /* Azul medio al pasar el mouse */
+}
+
+QPushButton#btn_ingresar:pressed {
+    background-color: #03045e; /* Azul profundo al hacer clic */
+}
+
+QPushButton#btn_salir {
+    background-color: transparent;
+    color: #0077b6;
+    border: 1px solid #b3e5fc;
+}
+
+QPushButton#btn_salir:hover {
+    background-color: #f1faff;
+    border: 1px solid #81d4fa;
+}
+
+
+/* ========================================================================
+   2. ESTILOS PARA LA VENTANA PRINCIPAL (VentanaPrincipal)
+   ======================================================================== */
+QWidget#main_window {
+    background-color: #caf0f8; /* Mismo fondo celeste claro */
+}
+
+/* BARRA SUPERIOR DE NAVEGACIÓN */
+QFrame#top_bar {
+    background-color: white;
+    border-bottom: 1px solid #e1f5fe;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    padding-top: 10px;
+    padding-bottom: 0px; /* Importante para el efecto inferior del botón */
+}
+
+QLabel#app_title {
+    color: #03045e;
+    font-size: 20px;
+    font-weight: bold;
+    margin-left: 25px;
+    margin-right: 35px;
+}
+
+QLabel#user_info {
+    color: #0077b6;
+    font-size: 14px;
+    font-weight: bold;
+    margin-right: 25px;
+}
+
+/* BOTONES DE NAVEGACIÓN HORIZONTAL (ESTILO PESTAÑA MODERNA) */
+QPushButton.nav_button {
+    background-color: transparent;
+    color: #03045e;
+    border: none;
+    border-radius: 0px;
+    padding: 15px 25px;
+    font-size: 14px;
+    font-weight: bold;
+    /* Indicador inferior invisible por defecto */
+    border-bottom: 4px solid transparent; 
+}
+
+/* Efecto al pasar el mouse (Hover) */
+QPushButton.nav_button:hover {
+    background-color: #f8fdff; /* Un gris-azul casi imperceptible */
+    color: #0077b6;
+}
+
+/* Efecto de Botón SELECCIONADO (Checked) -> AQUÍ ESTÁ LA MAGIA */
+QPushButton.nav_button:checked {
+    color: #00b4d8; /* Texto Cian brillante */
+    /* Indicador inferior CIAN GRUESO */
+    border-bottom: 4px solid #00b4d8; 
+}
+
+/* Botón Cerrar Sesión (Estilo texto en la barra superior) */
+QPushButton#btn_logout_top {
+    background-color: transparent;
+    color: #f44336; /* Mantenemos rojo de advertencia */
+    border: none;
+    font-size: 13px;
+    font-weight: bold;
+    margin-right: 25px;
+    padding: 5px;
+}
+QPushButton#btn_logout_top:hover {
+    color: #d32f2f;
+    text-decoration: underline;
+}
+
+/* ÁREA DE CONTENIDO (LA CARTA DONDE APARECE CADA SECCIÓN) */
+QFrame#content_card {
+    background-color: white;
+    margin: 25px; /* Separación de los bordes de la ventana */
+    border-radius: 20px; /* Bordes redondeados modernos */
+}
+
+QLabel#section_title {
+    color: #03045e;
+    font-size: 32px;
+    font-weight: bold;
+    margin: 40px;
+}
+
+
+/* --- Estilos para Tablas de Datos (QTableWidget) --- */
+QTableWidget {
+    background-color: white;
+    border: 1px solid #e1f5fe;
+    border-radius: 10px;
+    gridline-color: #e1f5fe;
+    font-size: 13px;
+}
+
+QHeaderView::section {
+    background-color: #03045e;
+    color: white;
+    padding: 8px;
+    font-weight: bold;
+    border: none;
+}
+
+QTableWidget::item {
+    padding: 5px;
+    color: #03045e;
+}
+
+QTableWidget::item:selected {
+    background-color: #caf0f8;
+    color: #03045e;
+}
+
+/* --- Botones de Acción dentro de la Tabla --- */
+QPushButton#btn_tabla_penalizar {
+    background-color: #f44336;
+    color: white;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+QPushButton#btn_tabla_penalizar:hover { background-color: #d32f2f; }
+
+QPushButton#btn_tabla_despenalizar {
+    background-color: #4CAF50;
+    color: white;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+QPushButton#btn_tabla_despenalizar:hover { background-color: #388E3C; }
+
+/* --- Botones de Barra de Herramientas Superior --- */
+QPushButton#btn_herramienta_carnet {
+    background-color: white;
+    color: #0077b6;
+    border: 2px solid #00b4d8;
+    border-radius: 8px;
+    padding: 8px 15px;
+    font-size: 13px;
+    font-weight: bold;
+}
+QPushButton#btn_herramienta_carnet:hover {
+    background-color: #f1faff;
+}
