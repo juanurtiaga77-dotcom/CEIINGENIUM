@@ -65,3 +65,84 @@ def habilitar_usuario(lu_usuario):
 def resetear_contrasena_comision(lu_usuario):
     """Esta función ahora hace exactamente lo mismo que habilitar_usuario"""
     return habilitar_usuario(lu_usuario)
+
+def obtener_todos_beneficiarios():
+    """Trae la lista de todos los beneficiarios para mostrar su estado y cargo en configuración."""
+    try:
+        conexion = obtener_conexion()
+        if conexion.is_connected():
+            cursor = conexion.cursor(dictionary=True)
+            consulta = '''
+                SELECT lu, apellidos, nombres, cargo, penalizado, carrera
+                FROM beneficiarios
+                ORDER BY apellidos ASC, nombres ASC
+            '''
+            cursor.execute(consulta)
+            return cursor.fetchall()
+    except Error as e: 
+        print(f"Error al obtener todos los beneficiarios: {e}")
+        return []
+    finally:
+        if 'conexion' in locals() and conexion.is_connected():
+            cursor.close()
+            conexion.close()
+
+def buscar_beneficiario_por_lu(lu):
+    """Busca un beneficiario específico por LU para edición de cargo."""
+    try:
+        conexion = obtener_conexion()
+        if conexion.is_connected():
+            cursor = conexion.cursor(dictionary=True)
+            cursor.execute("SELECT lu, apellidos, nombres, cargo, penalizado FROM beneficiarios WHERE lu = %s", (lu,))
+            return cursor.fetchone()
+    except Error as e:
+        print(f"Error al buscar beneficiario por LU: {e}")
+        return None
+    finally:
+        if 'conexion' in locals() and conexion.is_connected():
+            cursor.close()
+            conexion.close()
+
+def actualizar_cargo_beneficiario(lu, nuevo_cargo):
+    """Actualiza el cargo de un beneficiario y gestiona su acceso a la comisión si corresponde."""
+    try:
+        conexion = obtener_conexion()
+        if conexion.is_connected():
+            cursor = conexion.cursor()
+            
+            # 1. Actualizar el cargo en beneficiarios
+            cursor.execute("UPDATE beneficiarios SET cargo = %s WHERE lu = %s", (nuevo_cargo, lu))
+            
+            # 2. Gestionar su cuenta en usuarios_comision
+            nuevo_cargo_clean = nuevo_cargo.lower().strip()
+            cargos_comision_clean = [
+                'presidenta del cei', 'presidencia',
+                'atención', 'atencion',
+                'comisión', 'comision',
+                'recursos humanos',
+                'informática', 'informatica',
+                'asienda', 'hacienda'
+            ]
+            
+            # Verificar si ya existe en usuarios_comision
+            cursor.execute("SELECT COUNT(*) FROM usuarios_comision WHERE lu_usuario = %s", (lu,))
+            existe = cursor.fetchone()[0]
+            
+            if nuevo_cargo_clean in cargos_comision_clean:
+                if not existe:
+                    # Si no existe, lo agregamos con su LU como contraseña por defecto
+                    cursor.execute("INSERT INTO usuarios_comision (lu_usuario, contrasena) VALUES (%s, %s)", (lu, lu))
+            else:
+                # Si el nuevo cargo es Estudiante u otro rol sin acceso, lo removemos de usuarios_comision
+                if existe:
+                    cursor.execute("DELETE FROM usuarios_comision WHERE lu_usuario = %s", (lu,))
+            
+            conexion.commit()
+            return True, "Cargo actualizado correctamente."
+    except Error as e:
+        print(f"Error al actualizar cargo: {e}")
+        return False, f"Error de base de datos: {e}"
+    finally:
+        if 'conexion' in locals() and conexion.is_connected():
+            cursor.close()
+            conexion.close()

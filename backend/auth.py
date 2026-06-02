@@ -24,11 +24,12 @@ def verificar_login(lu, pw):
                 ''', (lu, fecha_str, hora_str))
                 conexion.commit()
 
-                # 3. Buscar la foto y el NOMBRE COMPLETO en la tabla beneficiarios
-                cursor.execute("SELECT ruta_foto, nombres, apellidos FROM beneficiarios WHERE lu = %s", (lu,))
+                # 3. Buscar la foto, el NOMBRE COMPLETO y el CARGO en la tabla beneficiarios
+                cursor.execute("SELECT ruta_foto, nombres, apellidos, cargo FROM beneficiarios WHERE lu = %s", (lu,))
                 b = cursor.fetchone()
                 
                 ruta_foto = b['ruta_foto'] if b else None
+                cargo = b['cargo'] if (b and 'cargo' in b and b['cargo']) else 'Estudiante'
                 
                 # Armamos el nombre que aparecerá arriba a la derecha
                 if b and b['nombres'] and b['apellidos']:
@@ -36,12 +37,12 @@ def verificar_login(lu, pw):
                 else:
                     nombre_completo = f"Usuario {lu}"
                 
-                # Devolvemos True, el nombre real y la foto
-                return True, nombre_completo, ruta_foto
+                # Devolvemos True, el nombre real, la foto y el cargo
+                return True, nombre_completo, ruta_foto, cargo
             else:
-                return False, "LU o contraseña incorrectos", None
+                return False, "LU o contraseña incorrectos", None, 'Estudiante'
     except Error as e:
-        return False, f"Error de base de datos: {e}", None
+        return False, f"Error de base de datos: {e}", None, 'Estudiante'
     finally:
         if 'conexion' in locals() and conexion.is_connected(): cursor.close(); conexion.close()
 

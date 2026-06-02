@@ -134,7 +134,8 @@ def consolidar_devolucion_db(id_prestamo, lu_admin, objeto_danado, fecha_real_de
         if conexion.is_connected():
             cursor = conexion.cursor(dictionary=True)
             
-            cursor.execute("SELECT * FROM historial_prestamos WHERE id = %s AND devuelto IS NOT NULL", (id_prestamo,))
+            # Comprobar si ya está devuelta definitivamente (devuelto = 1)
+            cursor.execute("SELECT * FROM historial_prestamos WHERE id = %s AND devuelto = 1", (id_prestamo,))
             if cursor.fetchone(): return False
 
             cursor.execute("SELECT * FROM historial_prestamos WHERE id = %s", (id_prestamo,))
@@ -208,3 +209,29 @@ def consolidar_devolucion_db(id_prestamo, lu_admin, objeto_danado, fecha_real_de
     except Error as e: print(f"Error consolidar devolución: {e}"); return False
     finally:
         if 'conexion' in locals() and conexion.is_connected(): conexion.close()
+
+def marcar_devolucion_pendiente_db(id_prestamo):
+    try:
+        conexion = obtener_conexion()
+        if conexion.is_connected():
+            cursor = conexion.cursor()
+            cursor.execute("UPDATE historial_prestamos SET devuelto = 2 WHERE id = %s AND devuelto IS NULL", (id_prestamo,))
+            conexion.commit()
+            return cursor.rowcount > 0
+    except Error as e: print(f"Error marcar_devolucion_pendiente_db: {e}")
+    finally:
+        if 'conexion' in locals() and conexion.is_connected(): conexion.close()
+    return False
+
+def revertir_devolucion_pendiente_db(id_prestamo):
+    try:
+        conexion = obtener_conexion()
+        if conexion.is_connected():
+            cursor = conexion.cursor()
+            cursor.execute("UPDATE historial_prestamos SET devuelto = NULL WHERE id = %s AND devuelto = 2", (id_prestamo,))
+            conexion.commit()
+            return cursor.rowcount > 0
+    except Error as e: print(f"Error revertir_devolucion_pendiente_db: {e}")
+    finally:
+        if 'conexion' in locals() and conexion.is_connected(): conexion.close()
+    return False

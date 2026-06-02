@@ -23,7 +23,7 @@ class PestañaPancitos(QWidget):
 
         # ==================== SECCIÓN SUPERIOR: ENTREGA ====================
         frame_superior = QFrame()
-        frame_superior.setStyleSheet("background-color: white; border-radius: 10px; border: 1px solid #ddd;")
+        frame_superior.setObjectName("frame_card_superior")
         layout_sup = QHBoxLayout(frame_superior)
         layout_sup.setContentsMargins(15, 15, 15, 15)
 
@@ -43,9 +43,9 @@ class PestañaPancitos(QWidget):
         layout_info.setContentsMargins(0, 10, 0, 0)
         
         self.lbl_foto = QLabel("👤")
+        self.lbl_foto.setObjectName("lbl_foto")
         self.lbl_foto.setFixedSize(60, 60)
         self.lbl_foto.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.lbl_foto.setStyleSheet("font-size: 30px; background-color: #f1faff; border-radius: 30px;")
         
         self.lbl_detalles = QLabel("Presione ENTER para buscar a un alumno.")
         self.lbl_detalles.setWordWrap(True)

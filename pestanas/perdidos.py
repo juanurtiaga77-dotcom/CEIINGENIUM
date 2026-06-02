@@ -100,7 +100,8 @@ class PestañaPerdidos(QWidget):
         self.inicializar_ui()
 
     def cargar_cola_local(self):
-        archivo = "cola_perdidos.json"
+        import socket
+        archivo = f"cola_perdidos_{socket.gethostname()}.json"
         if os.path.exists(archivo):
             try:
                 with open(archivo, "r", encoding="utf-8") as f:
@@ -130,7 +131,9 @@ class PestañaPerdidos(QWidget):
             }
         if datos:
             try:
-                with open("cola_perdidos.json", "w", encoding="utf-8") as f:
+                import socket
+                archivo = f"cola_perdidos_{socket.gethostname()}.json"
+                with open(archivo, "w", encoding="utf-8") as f:
                     json.dump(datos, f)
             except: pass
 

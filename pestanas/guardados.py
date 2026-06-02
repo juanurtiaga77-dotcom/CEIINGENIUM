@@ -91,7 +91,8 @@ class PestañaGuardados(QWidget):
         self.inicializar_ui()
 
     def cargar_cola_local(self):
-        archivo = "cola_guardados.json"
+        import socket
+        archivo = f"cola_guardados_{socket.gethostname()}.json"
         if os.path.exists(archivo):
             try:
                 with open(archivo, "r", encoding="utf-8") as f:
@@ -111,7 +112,9 @@ class PestañaGuardados(QWidget):
             datos[str(id_g)] = {'timestamp': data['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}
         if datos:
             try:
-                with open("cola_guardados.json", "w", encoding="utf-8") as f: json.dump(datos, f)
+                import socket
+                archivo = f"cola_guardados_{socket.gethostname()}.json"
+                with open(archivo, "w", encoding="utf-8") as f: json.dump(datos, f)
             except: pass
 
     def inicializar_ui(self):
@@ -126,6 +129,13 @@ class PestañaGuardados(QWidget):
         self.btn_agregar.clicked.connect(self.controlador_agregar)
         layout_herramientas.addWidget(self.btn_agregar)
         layout_herramientas.addStretch()
+
+        self.input_busqueda = QLineEdit()
+        self.input_busqueda.setPlaceholderText("🔍 Buscar por LU, Alumno, Objeto o Ubicación...")
+        self.input_busqueda.setMinimumWidth(320)
+        self.input_busqueda.textChanged.connect(self.filtrar_tabla)
+        layout_herramientas.addWidget(self.input_busqueda)
+
         layout_principal.addLayout(layout_herramientas)
 
         self.tabla = QTableWidget()
@@ -147,6 +157,9 @@ class PestañaGuardados(QWidget):
         self.actualizar_tabla_datos()
 
     def actualizar_tabla_datos(self):
+        v_scroll = self.tabla.verticalScrollBar().value()
+        h_scroll = self.tabla.horizontalScrollBar().value()
+
         elementos = backend.obtener_todos_guardados()
         self.tabla.setRowCount(0)
 
@@ -201,6 +214,12 @@ class PestañaGuardados(QWidget):
                 
             self.tabla.setCellWidget(i, 9, w_btns)
 
+        self.filtrar_tabla()
+
+        self.tabla.verticalScrollBar().setValue(v_scroll)
+        self.tabla.horizontalScrollBar().setValue(h_scroll)
+
+
     def controlador_agregar(self):
         dialogo = DialogoGuardar(self)
         if dialogo.exec():
@@ -241,3 +260,16 @@ class PestañaGuardados(QWidget):
         if completados:
             for i in completados: del self.cola_devoluciones[i]
             self.actualizar_tabla_datos()
+
+    def filtrar_tabla(self, texto_busqueda=""):
+        if not isinstance(texto_busqueda, str):
+            texto_busqueda = self.input_busqueda.text()
+        t = texto_busqueda.strip().lower()
+        for fila in range(self.tabla.rowCount()):
+            mostrar_fila = False
+            for col in (1, 2, 3, 4, 5): 
+                item = self.tabla.item(fila, col)
+                if item and t in item.text().lower():
+                    mostrar_fila = True
+                    break
+            self.tabla.setRowHidden(fila, not mostrar_fila)

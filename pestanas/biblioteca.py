@@ -27,7 +27,8 @@ class PestañaBiblioteca(QWidget):
         self.inicializar_ui()
 
     def cargar_cola_local(self):
-        archivo = "cola_biblio.json"
+        import socket
+        archivo = f"cola_biblio_{socket.gethostname()}.json"
         if os.path.exists(archivo):
             try:
                 with open(archivo, "r", encoding="utf-8") as f:
@@ -60,7 +61,9 @@ class PestañaBiblioteca(QWidget):
             }
         if datos:
             try:
-                with open("cola_biblio.json", "w", encoding="utf-8") as f:
+                import socket
+                archivo = f"cola_biblio_{socket.gethostname()}.json"
+                with open(archivo, "w", encoding="utf-8") as f:
                     json.dump(datos, f)
             except Exception:
                 pass
@@ -213,6 +216,9 @@ class PestañaBiblioteca(QWidget):
             QMessageBox.warning(self, "Operación Denegada", msj)
 
     def actualizar_tabla(self):
+        v_scroll = self.tabla.verticalScrollBar().value()
+        h_scroll = self.tabla.horizontalScrollBar().value()
+
         # --- CAMBIO 2: Se pide TODO el historial al backend sin usar el filtro de texto ---
         historial = backend.obtener_historial_biblio("")
         self.tabla.setRowCount(0)
@@ -233,13 +239,13 @@ class PestañaBiblioteca(QWidget):
             self.tabla.setItem(f_idx, 4, QTableWidgetItem(fecha_str))
             self.tabla.setItem(f_idx, 5, QTableWidgetItem(hora_str))
 
-            if h['devuelto']:
+            if h['devuelto'] == 1: # Devuelto definitivamente
                 self.tabla.setItem(f_idx, 6, QTableWidgetItem(f"{h['fecha_devolucion']} {h['hora_devolucion']}"))
                 item_est = QTableWidgetItem("🟢 Devuelto")
                 item_est.setForeground(QColor("#4CAF50"))
                 self.tabla.setItem(f_idx, 7, item_est)
                 self.tabla.setCellWidget(f_idx, 8, QLabel("")) 
-            else:
+            else: # devuelto IS NULL (activo) o devuelto = 2 (procesando)
                 self.tabla.setItem(f_idx, 6, QTableWidgetItem("-"))
                 
                 if id_p in self.cola_devoluciones:
@@ -272,7 +278,16 @@ class PestañaBiblioteca(QWidget):
                     self.tabla.setCellWidget(f_idx, 8, widget_btn)
                     
                     self.cola_devoluciones[id_p]['btn'] = btn_deshacer 
-
+                elif h['devuelto'] == 2:
+                    # Se está devolviendo en la otra terminal
+                    item_est = QTableWidgetItem("⏳ En Proceso (Otra PC)")
+                    item_est.setForeground(QColor("#FF9800"))
+                    self.tabla.setItem(f_idx, 7, item_est)
+                    
+                    lbl_proc = QLabel("En Devolución...")
+                    lbl_proc.setStyleSheet("color: #FF9800; font-weight: bold;")
+                    lbl_proc.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                    self.tabla.setCellWidget(f_idx, 8, lbl_proc)
                 else:
                     item_est = QTableWidgetItem("🔴 Prestado")
                     item_est.setForeground(QColor("#f44336"))
@@ -288,18 +303,27 @@ class PestañaBiblioteca(QWidget):
         # --- CAMBIO 3: Ejecutamos el filtro visual justo después de cargar todos los datos ---
         self.filtrar_tabla(self.input_filtro.text())
 
+        self.tabla.verticalScrollBar().setValue(v_scroll)
+        self.tabla.horizontalScrollBar().setValue(h_scroll)
+
     def iniciar_devolucion(self):
         id_p = self.sender().property("id_p")
-        self.cola_devoluciones[id_p] = {
-            'inicio': datetime.now(), 
-            'danado': False,
-            'btn': None
-        }
-        self.actualizar_tabla()
+        # 1. Marcar estado 2 en DB
+        if backend.marcar_devolucion_pendiente_biblio_db(id_p):
+            # 2. Agregar a la cola local en RAM
+            self.cola_devoluciones[id_p] = {
+                'inicio': datetime.now(), 
+                'danado': False,
+                'btn': None
+            }
+            self.actualizar_tabla()
 
     def cancelar_devolucion(self):
         id_p = self.sender().property("id_p")
         if id_p in self.cola_devoluciones:
+            # 1. Revertir a NULL en DB
+            backend.revertir_devolucion_pendiente_biblio_db(id_p)
+            # 2. Quitar de RAM
             del self.cola_devoluciones[id_p]
             self.actualizar_tabla()
 

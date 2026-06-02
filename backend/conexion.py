@@ -1,6 +1,5 @@
 import mysql.connector
 
-# Configuración única y centralizada
 DB_CONFIG = {
     'host': '192.168.0.110',
     'user': 'root',

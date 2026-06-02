@@ -41,7 +41,8 @@ class PestañaVentas(QWidget):
         self.inicializar_ui()
 
     def cargar_cola_local(self):
-        archivo = "cola_ventas.json"
+        import socket
+        archivo = f"cola_ventas_{socket.gethostname()}.json"
         if os.path.exists(archivo):
             try:
                 with open(archivo, "r", encoding="utf-8") as f:
@@ -92,7 +93,9 @@ class PestañaVentas(QWidget):
             
         if datos['recientes'] or datos['deshechas']:
             try:
-                with open("cola_ventas.json", "w", encoding="utf-8") as f:
+                import socket
+                archivo = f"cola_ventas_{socket.gethostname()}.json"
+                with open(archivo, "w", encoding="utf-8") as f:
                     json.dump(datos, f)
             except Exception as e:
                 print(f"Error al guardar cola de ventas: {e}")
@@ -110,7 +113,7 @@ class PestañaVentas(QWidget):
         layout_izq.addWidget(QLabel("<b>🛒 Punto de Venta</b>"))
         layout_selector = QHBoxLayout()
         self.combo_articulos = QComboBox()
-        self.combo_articulos.setStyleSheet("padding: 8px;")
+        self.combo_articulos.setObjectName("combo_articulos")
         layout_selector.addWidget(self.combo_articulos, stretch=1)
         
         btn_agregar = QPushButton("Agregar al Carrito")
@@ -165,7 +168,7 @@ class PestañaVentas(QWidget):
         layout_der.setContentsMargins(0,0,0,0)
 
         frame_caja = QFrame()
-        frame_caja.setStyleSheet("background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 8px;")
+        frame_caja.setObjectName("frame_card_caja")
         layout_caja = QVBoxLayout(frame_caja)
         layout_caja.addWidget(QLabel("<b>💰 Resumen de Caja</b>"))
         
@@ -366,6 +369,9 @@ class PestañaVentas(QWidget):
                         QMessageBox.information(self, "Arqueo Correcto", "¡La caja cuadra perfectamente! Buen trabajo.")
 
     def actualizar_historial(self):
+        v_scroll = self.tabla_historial.verticalScrollBar().value()
+        h_scroll = self.tabla_historial.horizontalScrollBar().value()
+
         ventas = backend.obtener_historial_48h()
         self.tabla_historial.setRowCount(0)
         
@@ -399,6 +405,9 @@ class PestañaVentas(QWidget):
                 item_cons = QTableWidgetItem("Consolidada")
                 item_cons.setForeground(QColor("#4CAF50"))
                 self.tabla_historial.setItem(i, 6, item_cons)
+
+        self.tabla_historial.verticalScrollBar().setValue(v_scroll)
+        self.tabla_historial.horizontalScrollBar().setValue(h_scroll)
 
     def deshacer_venta(self, id_venta):
         if id_venta in self.ventas_recientes:

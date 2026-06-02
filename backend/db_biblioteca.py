@@ -62,7 +62,8 @@ def consolidar_devolucion_biblio(id_p, lu_admin, danado, fecha_real=None):
             cursor = conexion.cursor(dictionary=True)
             cursor.execute("SELECT * FROM historial_biblioteca WHERE id = %s", (id_p,))
             p = cursor.fetchone()
-            if not p or p['devuelto']: return False
+            # Comprobar si ya está devuelta definitivamente (devuelto = 1)
+            if not p or p['devuelto'] == 1: return False
 
             ahora = fecha_real if fecha_real else datetime.now()
             dt_prestamo = datetime.combine(p['fecha_prestamo'], (datetime.min + p['hora_prestamo']).time())
@@ -96,7 +97,7 @@ def consolidar_devolucion_biblio(id_p, lu_admin, danado, fecha_real=None):
             
             cursor.execute('''
                 UPDATE historial_biblioteca SET lu_usuario_recibe=%s, apellidos_recibe=%s, nombres_recibe=%s, 
-                fecha_devolucion=%s, hora_devolucion=%s, devuelto=TRUE, objeto_danado=%s, corresponde_falta=%s WHERE id=%s
+                fecha_devolucion=%s, hora_devolucion=%s, devuelto=TRUE, objeto_danado=%s, corresponds_falta=%s WHERE id=%s
             ''', (lu_admin, admin['apellidos'], admin['nombres'], ahora.strftime('%Y-%m-%d'), ahora.strftime('%H:%M:%S'), danado, es_tarde, id_p))
             
             cursor.execute("UPDATE libros SET disponible = disponible + 1 WHERE id = %s", (p['id_libro'],))
@@ -105,3 +106,29 @@ def consolidar_devolucion_biblio(id_p, lu_admin, danado, fecha_real=None):
     except Error as e: print(e); return False
     finally:
         if 'conexion' in locals() and conexion.is_connected(): conexion.close()
+
+def marcar_devolucion_pendiente_biblio_db(id_p):
+    try:
+        conexion = obtener_conexion()
+        if conexion.is_connected():
+            cursor = conexion.cursor()
+            cursor.execute("UPDATE historial_biblioteca SET devuelto = 2 WHERE id = %s AND devuelto IS NULL", (id_p,))
+            conexion.commit()
+            return cursor.rowcount > 0
+    except Error as e: print(f"Error marcar_devolucion_pendiente_biblio_db: {e}")
+    finally:
+        if 'conexion' in locals() and conexion.is_connected(): conexion.close()
+    return False
+
+def revertir_devolucion_pendiente_biblio_db(id_p):
+    try:
+        conexion = obtener_conexion()
+        if conexion.is_connected():
+            cursor = conexion.cursor()
+            cursor.execute("UPDATE historial_biblioteca SET devuelto = NULL WHERE id = %s AND devuelto = 2", (id_p,))
+            conexion.commit()
+            return cursor.rowcount > 0
+    except Error as e: print(f"Error revertir_devolucion_pendiente_biblio_db: {e}")
+    finally:
+        if 'conexion' in locals() and conexion.is_connected(): conexion.close()
+    return False

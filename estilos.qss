@@ -230,3 +230,77 @@ QPushButton#btn_herramienta_carnet {
 QPushButton#btn_herramienta_carnet:hover {
     background-color: #f1faff;
 }
+
+/* --- Visual Badge (Tag) de Roles --- */
+QLabel#user_badge {
+    background-color: #e0f2fe;
+    color: #0369a1;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 8px;
+    padding: 4px 10px;
+    border: 1px solid #bae6fd;
+}
+
+/* --- Panel de Configuración Especial --- */
+QFrame#config_info_card {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+
+QLabel#config_welcome_title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #1e293b;
+}
+
+QLabel#config_description {
+    font-size: 14px;
+    color: #64748b;
+}
+
+/* --- Cards y Paneles Claros --- */
+QFrame#frame_card_beneficiario, QFrame#frame_card_objeto, QFrame#frame_card_superior {
+    background-color: white;
+    border-radius: 10px;
+}
+
+QLabel#lbl_foto_bene, QLabel#lbl_foto {
+    font-size: 30px;
+    background-color: #f1faff;
+    border-radius: 30px;
+}
+
+QFrame#frame_card_caja {
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+/* --- QComboBox (Modo Claro) --- */
+QComboBox {
+    background-color: white;
+    color: #03045e;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 8px 12px;
+}
+
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 25px;
+    border-left-width: 0px;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+QComboBox QAbstractItemView {
+    background-color: white;
+    color: #03045e;
+    border: 1px solid #ccc;
+    selection-background-color: #caf0f8;
+    selection-color: #03045e;
+    padding: 5px;
+}

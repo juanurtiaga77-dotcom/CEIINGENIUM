@@ -33,7 +33,8 @@ class PestañaPrestamos(QWidget):
 
     def cargar_cola_local(self):
         """Si el programa se cerró, recupera los temporizadores de un archivo local."""
-        archivo = "cola_devoluciones.json"
+        import socket
+        archivo = f"cola_devoluciones_{socket.gethostname()}.json"
         if os.path.exists(archivo):
             try:
                 with open(archivo, "r") as f:
@@ -69,7 +70,9 @@ class PestañaPrestamos(QWidget):
             }
         if datos:
             try:
-                with open("cola_devoluciones.json", "w") as f:
+                import socket
+                archivo = f"cola_devoluciones_{socket.gethostname()}.json"
+                with open(archivo, "w") as f:
                     json.dump(datos, f)
             except Exception as e:
                 print(f"Error guardando cola local: {e}")
@@ -81,13 +84,13 @@ class PestañaPrestamos(QWidget):
         layout_superior = QHBoxLayout()
         
         frame_beneficiario = QFrame()
-        frame_beneficiario.setStyleSheet("background-color: white; border-radius: 10px;")
+        frame_beneficiario.setObjectName("frame_card_beneficiario")
         layout_bene_main = QHBoxLayout(frame_beneficiario)
         
         self.lbl_foto_bene = QLabel("👤")
+        self.lbl_foto_bene.setObjectName("lbl_foto_bene")
         self.lbl_foto_bene.setFixedSize(60, 60)
         self.lbl_foto_bene.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.lbl_foto_bene.setStyleSheet("font-size: 30px; background-color: #f1faff; border-radius: 30px;")
         
         # --- ACTIVACIÓN DE CLIC EN LA FOTO ---
         self.lbl_foto_bene.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -112,12 +115,12 @@ class PestañaPrestamos(QWidget):
         layout_superior.addWidget(frame_beneficiario, stretch=1)
 
         frame_objeto = QFrame()
-        frame_objeto.setStyleSheet("background-color: white; border-radius: 10px;")
+        frame_objeto.setObjectName("frame_card_objeto")
         layout_obj = QVBoxLayout(frame_objeto)
         
         layout_obj.addWidget(QLabel("Seleccionar objeto a prestar:"))
         self.combo_objetos = QComboBox()
-        self.combo_objetos.setStyleSheet("padding: 8px; border: 1px solid #ccc;")
+        self.combo_objetos.setObjectName("combo_objetos")
         layout_obj.addWidget(self.combo_objetos)
         
         self.btn_prestar = QPushButton("✅ Asignar Préstamo")
@@ -276,6 +279,9 @@ class PestañaPrestamos(QWidget):
             QMessageBox.warning(self, "Operación Denegada", msj)
 
     def actualizar_tabla(self):
+        v_scroll = self.tabla.verticalScrollBar().value()
+        h_scroll = self.tabla.horizontalScrollBar().value()
+
         historial = backend.obtener_historial_activo("")
         self.tabla.setRowCount(0)
 
@@ -295,13 +301,13 @@ class PestañaPrestamos(QWidget):
             self.tabla.setItem(f_idx, 4, QTableWidgetItem(fecha_str))
             self.tabla.setItem(f_idx, 5, QTableWidgetItem(hora_str))
 
-            if h['devuelto']:
+            if h['devuelto'] == 1: # Devuelto definitivamente
                 self.tabla.setItem(f_idx, 6, QTableWidgetItem(f"{h['fecha_devolucion']} {h['hora_devolucion']}"))
                 item_est = QTableWidgetItem("🟢 Devuelto")
                 item_est.setForeground(QColor("#4CAF50"))
                 self.tabla.setItem(f_idx, 7, item_est)
                 self.tabla.setCellWidget(f_idx, 8, QLabel("")) 
-            else:
+            else: # devuelto IS NULL (activo) o devuelto = 2 (procesando)
                 self.tabla.setItem(f_idx, 6, QTableWidgetItem("-"))
                 
                 if id_p in self.cola_devoluciones:
@@ -334,7 +340,16 @@ class PestañaPrestamos(QWidget):
                     self.tabla.setCellWidget(f_idx, 8, widget_btn)
                     
                     self.cola_devoluciones[id_p]['btn'] = btn_deshacer 
-
+                elif h['devuelto'] == 2:
+                    # Devuelto en proceso en la otra PC
+                    item_est = QTableWidgetItem("⏳ En Proceso (Otra PC)")
+                    item_est.setForeground(QColor("#FF9800"))
+                    self.tabla.setItem(f_idx, 7, item_est)
+                    
+                    lbl_proc = QLabel("En Devolución...")
+                    lbl_proc.setStyleSheet("color: #FF9800; font-weight: bold;")
+                    lbl_proc.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                    self.tabla.setCellWidget(f_idx, 8, lbl_proc)
                 else:
                     item_est = QTableWidgetItem("🔴 En Préstamo")
                     item_est.setForeground(QColor("#f44336"))
@@ -349,18 +364,27 @@ class PestañaPrestamos(QWidget):
 
         self.filtrar_tabla(self.input_filtro.text())
 
+        self.tabla.verticalScrollBar().setValue(v_scroll)
+        self.tabla.horizontalScrollBar().setValue(h_scroll)
+
     def iniciar_devolucion(self):
         id_p = self.sender().property("id_p")
-        self.cola_devoluciones[id_p] = {
-            'inicio': datetime.now(), 
-            'danado': False,
-            'btn': None
-        }
-        self.actualizar_tabla()
+        # 1. Marcar el estado temporal 2 en la Base de Datos para notificar a otras terminales
+        if backend.marcar_devolucion_pendiente_db(id_p):
+            # 2. Agregar a la cola local en RAM
+            self.cola_devoluciones[id_p] = {
+                'inicio': datetime.now(), 
+                'danado': False,
+                'btn': None
+            }
+            self.actualizar_tabla()
 
     def cancelar_devolucion(self):
         id_p = self.sender().property("id_p")
         if id_p in self.cola_devoluciones:
+            # 1. Revertir a NULL el estado en la base de datos
+            backend.revertir_devolucion_pendiente_db(id_p)
+            # 2. Quitar de la cola local en RAM
             del self.cola_devoluciones[id_p]
             self.actualizar_tabla()
 

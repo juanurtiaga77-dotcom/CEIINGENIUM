@@ -19,17 +19,23 @@ from pestanas.libros import PestañaLibros
 from pestanas.biblioteca import PestañaBiblioteca
 from pestanas.historial_general import PestañaHistorialGeneral
 from pestanas.comision import PestañaComision
+from pestanas.configuracion import PestañaConfiguracion
 from backend.db_backup import chequear_y_ejecutar_backup
 # IMPORTAMOS LA UTILIDAD DE VISTAS
 from backend.utils_vistas import procesar_avatar_circular
 
 class VentanaPrincipal(QWidget):
-    def __init__(self, nombre_usuario, lu_usuario, ruta_foto_perfil):
+    def __init__(self, nombre_usuario, lu_usuario, ruta_foto_perfil, cargo_usuario="Estudiante"):
         super().__init__()
         self.nombre_usuario = nombre_usuario
         self.lu_usuario = lu_usuario          
         self.ruta_foto = ruta_foto_perfil 
+        self.cargo_usuario = cargo_usuario
         self.hora_ingreso = datetime.now()    
+        
+        self.modo_oscuro = False
+        self.cargar_config_tema()
+        
         self.inicializar_ui()
         # =====================================================================
         # SYSTEM BACKUP AUTOMÁTICO REGLA 19:00 HS
@@ -44,7 +50,10 @@ class VentanaPrincipal(QWidget):
     def inicializar_ui(self):
         self.setWindowTitle("Sistema CEI - INGENIUM")
         self.setObjectName("main_window")
-        self.setWindowIcon(QIcon("logo.png")) 
+        import os
+        import sys
+        ruta_logo = os.path.join(sys._MEIPASS, "logo.png") if hasattr(sys, '_MEIPASS') else "logo.png"
+        self.setWindowIcon(QIcon(ruta_logo)) 
         self.showMaximized() 
 
         # LAYOUT PRINCIPAL VERTICAL (El "Sándwich")
@@ -89,6 +98,18 @@ class VentanaPrincipal(QWidget):
         self.label_user.setObjectName("user_info")
         layout_top.addWidget(self.label_user)
 
+        # Tag/Badge visual de Cargo
+        self.label_cargo = QLabel(self.cargo_usuario.upper())
+        self.label_cargo.setObjectName("user_badge")
+        layout_top.addWidget(self.label_cargo)
+
+        # Botón Alternar Tema (Modo Oscuro)
+        self.btn_tema_toggle = QPushButton("☀️ Modo Claro" if self.modo_oscuro else "🌙 Modo Oscuro")
+        self.btn_tema_toggle.setObjectName("btn_tema_toggle")
+        self.btn_tema_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_tema_toggle.clicked.connect(self.cambiar_tema)
+        layout_top.addWidget(self.btn_tema_toggle)
+
         # Botón Cerrar Sesión
         self.btn_logout = QPushButton("Cerrar Sesión")
         self.btn_logout.setObjectName("btn_logout_top")
@@ -111,6 +132,19 @@ class VentanaPrincipal(QWidget):
         layout_nav.addStretch() 
 
         opciones = ["Préstamos", "Ventas", "Pancitos", "Perdidos", "Guardados", "Librería", "Objetos", "Libros", "Biblioteca", "Carnets", "Atención", "Historial"]
+        
+        # Acceso a Configuración para los primeros 5 roles (Presidencia, Comisión, Recursos Humanos, Informática, Asienda)
+        cargo_clean = self.cargo_usuario.lower().strip() if self.cargo_usuario else ""
+        cargos_configuracion = [
+            "presidencia", "presidenta del cei", 
+            "comisión", "comision", 
+            "recursos humanos", 
+            "informática", "informatica", 
+            "asienda", "hacienda"
+        ]
+        if cargo_clean in cargos_configuracion:
+            opciones.append("Configuración")
+            
         self.botones_menu = []
         
         for texto in opciones:
@@ -164,6 +198,8 @@ class VentanaPrincipal(QWidget):
                 pagina = PestañaHistorialGeneral(self.lu_usuario)
             elif texto == "Atención":
                 pagina = PestañaComision(self.lu_usuario)
+            elif texto == "Configuración":
+                pagina = PestañaConfiguracion(self.lu_usuario)
             else:
                 pagina = QFrame()
                 layout_pag = QVBoxLayout(pagina)
@@ -214,8 +250,85 @@ class VentanaPrincipal(QWidget):
             self.contenedor_paginas.setCurrentIndex(indice)
         except ValueError: pass
 
+    def cargar_config_tema(self):
+        import json
+        archivo = f"config_tema_{self.lu_usuario}.json"
+        if os.path.exists(archivo):
+            try:
+                with open(archivo, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    self.modo_oscuro = data.get("modo_oscuro", False)
+            except:
+                pass
+
+    def guardar_config_tema(self):
+        import json
+        archivo = f"config_tema_{self.lu_usuario}.json"
+        try:
+            with open(archivo, "w", encoding="utf-8") as f:
+                json.dump({"modo_oscuro": self.modo_oscuro}, f)
+        except:
+            pass
+
+    def cambiar_tema(self):
+        self.modo_oscuro = not self.modo_oscuro
+        self.guardar_config_tema()
+        self.cargar_estilos()
+        
+        if self.modo_oscuro:
+            self.btn_tema_toggle.setText("☀️ Modo Claro")
+        else:
+            self.btn_tema_toggle.setText("🌙 Modo Oscuro")
+
+    def aplicar_tema_recursivo(self, widget, is_dark):
+        if hasattr(widget, "styleSheet") and widget.styleSheet():
+            ss = widget.styleSheet()
+            if is_dark:
+                # Reemplazo de colores claros inline por colores oscuros compatibles
+                ss = ss.replace("background-color: white;", "background-color: #1e1e2a;")
+                ss = ss.replace("background-color: white", "background-color: #1e1e2a")
+                ss = ss.replace("background-color: #f1faff;", "background-color: #151522;")
+                ss = ss.replace("background-color: #f1faff", "background-color: #151522")
+                ss = ss.replace("background-color: #f8f9fa;", "background-color: #151522;")
+                ss = ss.replace("background-color: #f8f9fa", "background-color: #151522")
+                ss = ss.replace("color: #333;", "color: #e0e0e9;")
+                ss = ss.replace("color: #333", "color: #e0e0e9")
+                ss = ss.replace("color: #555;", "color: #a0a0bf;")
+                ss = ss.replace("color: #555", "color: #a0a0bf")
+                ss = ss.replace("color: #666;", "color: #a0a0bf;")
+                ss = ss.replace("color: #666", "color: #a0a0bf")
+                ss = ss.replace("border: 1px solid #ccc;", "border: 1px solid #2d2d3f;")
+                ss = ss.replace("border: 1px solid #ccc", "border: 1px solid #2d2d3f")
+                ss = ss.replace("border: 1px solid #ddd;", "border: 1px solid #2d2d3f;")
+                ss = ss.replace("border: 1px solid #ddd", "border: 1px solid #2d2d3f")
+            else:
+                # Reemplazo inverso de colores oscuros inline por colores claros
+                ss = ss.replace("background-color: #1e1e2a;", "background-color: white;")
+                ss = ss.replace("background-color: #1e1e2a", "background-color: white")
+                ss = ss.replace("background-color: #151522;", "background-color: #f1faff;")
+                ss = ss.replace("background-color: #151522", "background-color: #f1faff")
+                ss = ss.replace("color: #e0e0e9;", "color: #333;")
+                ss = ss.replace("color: #e0e0e9", "color: #333")
+                ss = ss.replace("color: #a0a0bf;", "color: #666;")
+                ss = ss.replace("color: #a0a0bf", "color: #666")
+                ss = ss.replace("border: 1px solid #2d2d3f;", "border: 1px solid #ccc;")
+                ss = ss.replace("border: 1px solid #2d2d3f", "border: 1px solid #ccc")
+            widget.setStyleSheet(ss)
+        
+        # Propagar a todos los componentes hijos
+        for child in widget.findChildren(QWidget):
+            self.aplicar_tema_recursivo(child, is_dark)
+
     def cargar_estilos(self):
         try:
-            with open("estilos.qss", "r", encoding='utf-8') as f:
+            import os
+            import sys
+            archivo_qss = "estilos_oscuros.qss" if self.modo_oscuro else "estilos.qss"
+            ruta_qss = os.path.join(sys._MEIPASS, archivo_qss) if hasattr(sys, '_MEIPASS') else archivo_qss
+            with open(ruta_qss, "r", encoding='utf-8') as f:
                 self.setStyleSheet(f.read())
-        except: pass
+            
+            # Aplicamos recursivamente los estilos para sobreescribir estilos inline
+            self.aplicar_tema_recursivo(self, self.modo_oscuro)
+        except Exception as e:
+            print(f"Error cargando estilos: {e}")

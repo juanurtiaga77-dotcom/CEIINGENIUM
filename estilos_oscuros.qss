@@ -1,0 +1,321 @@
+/* ========================================================================
+   ESTILOS GENERALES Y FUENTES - MODO OSCURO
+   ======================================================================== */
+* {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: #e0e0e9; /* Texto claro predeterminado */
+}
+
+/* ========================================================================
+   1. ESTILOS PARA LA VENTANA DE INICIO DE SESIÓN (VentanaLogin)
+   ======================================================================== */
+QWidget#login_window {
+    background-color: #0f0f16; /* Fondo oscuro obsidiana */
+}
+
+/* La "Carta" central flotante */
+QFrame#login_card {
+    background-color: #1a1a24; /* Gris oscuro para la tarjeta */
+    border-radius: 20px;
+    padding: 40px;
+}
+
+QLabel#login_title {
+    color: #e0e0e9;
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+QLabel#login_label {
+    color: #00b4d8; /* Celeste cian brillante */
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* Campos de entrada de texto modernos */
+QLineEdit {
+    background-color: #1e1e2a; /* Gris azulado muy oscuro */
+    color: #e0e0e9;
+    border: 2px solid #2d2d3f;
+    border-radius: 10px;
+    padding: 12px 15px;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+QLineEdit:focus {
+    border: 2px solid #00b4d8; /* Borde cian brillante al hacer clic */
+    background-color: #1a1a24;
+}
+
+/* Botones del Login */
+QPushButton {
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 12px 20px;
+}
+
+QPushButton#btn_ingresar {
+    background-color: #00b4d8;
+    color: white;
+}
+
+QPushButton#btn_ingresar:hover {
+    background-color: #0077b6;
+}
+
+QPushButton#btn_ingresar:pressed {
+    background-color: #03045e;
+}
+
+QPushButton#btn_salir {
+    background-color: transparent;
+    color: #00b4d8;
+    border: 1px solid #2d2d3f;
+}
+
+QPushButton#btn_salir:hover {
+    background-color: #1e1e2a;
+    border: 1px solid #00b4d8;
+}
+
+
+/* ========================================================================
+   2. ESTILOS PARA LA VENTANA PRINCIPAL (VentanaPrincipal)
+   ======================================================================== */
+QWidget#main_window {
+    background-color: #0f0f16; /* Mismo fondo oscuro */
+}
+
+/* BARRA SUPERIOR DE NAVEGACIÓN */
+QFrame#top_bar {
+    background-color: #1a1a24;
+    border-bottom: 1px solid #2d2d3f;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    padding-top: 10px;
+    padding-bottom: 0px;
+}
+
+QLabel#app_title {
+    color: #e0e0e9;
+    font-size: 20px;
+    font-weight: bold;
+    margin-left: 25px;
+    margin-right: 35px;
+}
+
+QLabel#user_info {
+    color: #00b4d8;
+    font-size: 14px;
+    font-weight: bold;
+    margin-right: 25px;
+}
+
+/* BOTONES DE NAVEGACIÓN HORIZONTAL (ESTILO PESTAÑA MODERNA) */
+QPushButton.nav_button {
+    background-color: transparent;
+    color: #b0b0cf;
+    border: none;
+    border-radius: 0px;
+    padding: 15px 25px;
+    font-size: 14px;
+    font-weight: bold;
+    border-bottom: 4px solid transparent; 
+}
+
+/* Efecto al pasar el mouse (Hover) */
+QPushButton.nav_button:hover {
+    background-color: #1e1e2a;
+    color: #00b4d8;
+}
+
+/* Efecto de Botón SELECCIONADO (Checked) */
+QPushButton.nav_button:checked {
+    color: #00b4d8;
+    border-bottom: 4px solid #00b4d8; 
+}
+
+/* Botón Cerrar Sesión */
+QPushButton#btn_logout_top {
+    background-color: transparent;
+    color: #f44336;
+    border: none;
+    font-size: 13px;
+    font-weight: bold;
+    margin-right: 25px;
+    padding: 5px;
+}
+QPushButton#btn_logout_top:hover {
+    color: #e57373;
+    text-decoration: underline;
+}
+
+/* Botón del Modo Oscuro/Claro en la Top Bar */
+QPushButton#btn_tema_toggle {
+    background-color: #1e1e2a;
+    color: #00b4d8;
+    border: 1px solid #2d2d3f;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 6px 12px;
+    margin-right: 20px;
+}
+QPushButton#btn_tema_toggle:hover {
+    background-color: #2d2d3f;
+}
+
+/* ÁREA DE CONTENIDO (LA CARTA DONDE APARECE CADA SECCIÓN) */
+QFrame#content_card {
+    background-color: #1a1a24;
+    margin: 25px;
+    border-radius: 20px;
+}
+
+QLabel#section_title {
+    color: #e0e0e9;
+    font-size: 32px;
+    font-weight: bold;
+    margin: 40px;
+}
+
+
+/* --- Estilos para Tablas de Datos (QTableWidget) --- */
+QTableWidget {
+    background-color: #1e1e2a;
+    border: 1px solid #2d2d3f;
+    border-radius: 10px;
+    gridline-color: #2d2d3f;
+    font-size: 13px;
+}
+
+QHeaderView::section {
+    background-color: #0f0f16;
+    color: #e0e0e9;
+    padding: 8px;
+    font-weight: bold;
+    border: none;
+}
+
+QTableWidget::item {
+    padding: 5px;
+    color: #e0e0e9;
+}
+
+QTableWidget::item:selected {
+    background-color: #2d2d3f;
+    color: #e0e0e9;
+}
+
+/* --- Botones de Acción dentro de la Tabla --- */
+QPushButton#btn_tabla_penalizar {
+    background-color: #f44336;
+    color: white;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+QPushButton#btn_tabla_penalizar:hover { background-color: #d32f2f; }
+
+QPushButton#btn_tabla_despenalizar {
+    background-color: #4CAF50;
+    color: white;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+QPushButton#btn_tabla_despenalizar:hover { background-color: #388E3C; }
+
+/* --- Botones de Barra de Herramientas Superior --- */
+QPushButton#btn_herramienta_carnet {
+    background-color: #1e1e2a;
+    color: #00b4d8;
+    border: 2px solid #00b4d8;
+    border-radius: 8px;
+    padding: 8px 15px;
+    font-size: 13px;
+    font-weight: bold;
+}
+QPushButton#btn_herramienta_carnet:hover {
+    background-color: #2d2d3f;
+}
+
+/* --- Visual Badge (Tag) de Roles - Modo Oscuro --- */
+QLabel#user_badge {
+    background-color: #0c4a6e;
+    color: #38bdf8;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 8px;
+    padding: 4px 10px;
+    border: 1px solid #0284c7;
+}
+
+/* --- Panel de Configuración Especial - Modo Oscuro --- */
+QFrame#config_info_card {
+    background-color: #1e1e2a;
+    border: 1px solid #2d2d3f;
+    border-radius: 12px;
+}
+
+QLabel#config_welcome_title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #00b4d8;
+}
+
+QLabel#config_description {
+    font-size: 14px;
+    color: #a0a0bf;
+}
+
+/* --- Cards y Paneles Oscuros --- */
+QFrame#frame_card_beneficiario, QFrame#frame_card_objeto, QFrame#frame_card_superior {
+    background-color: #1e1e2a;
+    border-radius: 10px;
+    border: 1px solid #2d2d3f;
+}
+
+QLabel#lbl_foto_bene, QLabel#lbl_foto {
+    font-size: 30px;
+    background-color: #151522;
+    border-radius: 30px;
+    color: #00b4d8;
+}
+
+QFrame#frame_card_caja {
+    background-color: #151522;
+    border: 1px solid #2d2d3f;
+    border-radius: 8px;
+}
+
+/* --- QComboBox (Modo Oscuro) --- */
+QComboBox {
+    background-color: #1e1e2a;
+    color: #e0e0e9;
+    border: 1px solid #2d2d3f;
+    border-radius: 6px;
+    padding: 8px 12px;
+}
+
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 25px;
+    border-left-width: 0px;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #1e1e2a;
+    color: #e0e0e9;
+    border: 1px solid #2d2d3f;
+    selection-background-color: #00b4d8;
+    selection-color: white;
+    padding: 5px;
+}

@@ -15,7 +15,10 @@ class VentanaLogin(QWidget):
     def inicializar_ui(self):
         self.setWindowTitle("CEI Programa - Acceso")
         self.setObjectName("login_window") 
-        self.setWindowIcon(QIcon("logo.png"))
+        import os
+        import sys
+        ruta_logo = os.path.join(sys._MEIPASS, "logo.png") if hasattr(sys, '_MEIPASS') else "logo.png"
+        self.setWindowIcon(QIcon(ruta_logo))
         
         width, height = 420, 520
         self.setFixedSize(width, height)
@@ -93,7 +96,10 @@ class VentanaLogin(QWidget):
 
     def cargar_estilos(self):
         try:
-            with open("estilos.qss", "r", encoding='utf-8') as f:
+            import os
+            import sys
+            ruta_qss = os.path.join(sys._MEIPASS, "estilos.qss") if hasattr(sys, '_MEIPASS') else "estilos.qss"
+            with open(ruta_qss, "r", encoding='utf-8') as f:
                 self.setStyleSheet(f.read())
         except: pass
 
@@ -105,8 +111,8 @@ class VentanaLogin(QWidget):
             QMessageBox.warning(self, "Campos Vacíos", "Por favor ingrese LU y contraseña.")
             return
 
-        exito, resultado, ruta_foto = verificar_login(lu, pw)
-
+        exito, resultado, ruta_foto, cargo = verificar_login(lu, pw)
+        
         if exito:
             # --- COMPROBACIÓN DE PRIMER INGRESO ---
             if lu == pw:
@@ -136,9 +142,9 @@ class VentanaLogin(QWidget):
                     actualizar_contrasena(lu, nueva_pw)
                     QMessageBox.information(self, "Éxito", "Contraseña actualizada correctamente. ¡Bienvenido!")
                     break # Rompe el bucle para continuar con el login
-
-            # Si todo está bien, abre el sistema (resultado ahora contiene el NOMBRE)
-            self.nueva_ventana = VentanaPrincipal(resultado, lu, ruta_foto)
+            
+            # Si todo está bien, abre el sistema (resultado ahora contiene el NOMBRE, pasamos cargo)
+            self.nueva_ventana = VentanaPrincipal(resultado, lu, ruta_foto, cargo)
             self.nueva_ventana.show()
             self.close() 
         else:
